@@ -3,8 +3,8 @@
 <head>
     <title>Web App</title>
     <style>
-        /* Add some basic styling to the menu */
-        ul.menu {
+        /* Add some basic styling to the navigation bar */
+        ul.navigation-bar {
             list-style-type: none;
             margin: 0;
             padding: 0;
@@ -13,11 +13,11 @@
             display: flex; /* Use flexbox to evenly distribute the menu items */
         }
 
-        ul.menu li {
+        ul.navigation-bar li {
             flex: 1; /* Distribute the available space equally among the menu items */
         }
 
-        ul.menu li a {
+        ul.navigation-bar li a {
             display: block;
             color: #333;
             text-align: center;
@@ -25,13 +25,19 @@
             text-decoration: none;
         }
 
-        ul.menu li a:hover {
+        ul.navigation-bar li a:hover {
             background-color: #ddd;
+        }
+
+        /* Add styling for the logo image */
+        .logo {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
-    <ul class="menu">
+    <ul class="navigation-bar">
+        <li><img src="Grafiken/EnergyScan_logo.png" alt="Logo" class="logo"></li>
         <li><a href="page1.html">Marktübersicht</a></li>
         <li><a href="page2.html">Anlagen</a></li>
         <li><a href="page3.html">Transaktionen</a></li>
