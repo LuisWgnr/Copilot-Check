@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Transactions Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .navigation-bar_2 {
+            list-style-type: none;
+            padding: 0;
+            background-color: #f1f1f1;
+            overflow: hidden;
+            position: relative;
+        }
+        .navigation-bar_2 li {
+            float: left;
+        }
+        .navigation-bar_2 li a {
+            display: block;
+            color: #333;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Transaktionen</h1>
+
+    <ul class="navigation-bar_2">
+        <li><a href="Components/claim-publications.html">Claim Veröffentlichungen</a></li>
+        <li><a href="Components/energy-documentations.html">Messwerte</a></li>
+        <li><a href="Components/token-transfers.html">Token Transfers</a></li>
+    </ul>
+    <div id="inner-page-content"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wählen Sie alle Links in der Navigationsleiste aus
+            const links = document.querySelectorAll('.navigation-bar_2 a');
+    
+            // Fügen Sie jedem Link einen 'click' Event Listener hinzu
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault(); // Verhindern Sie das Standardverhalten des Links
+                    const url = this.getAttribute('href'); // Holen Sie sich die URL aus dem href-Attribut des Links
+                    loadContent(url); // Rufen Sie die loadContent Funktion mit der URL als Argument auf
+                });
+            });
+        });
+    
+        // Die loadContent Funktion ist bereits definiert und lädt den Inhalt in den #inner-page-content Container
+        function loadContent(url) {
+            fetch(url) // Laden Sie den Inhalt von der URL
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('inner-page-content').innerHTML = html; // Setzen Sie den geladenen Inhalt in den Container
+                })
+                .catch(error => console.error('Fehler beim Laden der Seite:', error));
+        }
+    </script>
+</body>
+</html>
