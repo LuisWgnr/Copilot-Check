@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .overview {
+            display: flex;
+            justify-content: space-between;
+        }
+        .section {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .market-participants, .transactions-table {
+            width: 100%;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="overview">
+        <div class="section">
+            <h2>Übersicht</h2>
+            <p>Adresse:</p>
+            <p>Bilanzzeitraum: 15 Minuten</p>
+            <p>Smart Contracts: <a href="https://b2e2-blockexplorer-prod.azurewebsites.net/address/0x4995241d2f0781D96c49D418e4A0fCF812d7ebA3">Energy Token Contract</a></p>
+            <p>Marktregeln: <a href="https://it-architecture.enbw.com/whitepaper-energy-token-model/">https://it-architecture.enbw.com/whitepaper-energy-token-model/</a></p>
+        </div>
+        <div class="section">
+            <h2>Installierte Erzeugungsleistung (kW peak)</h2>
+            <!-- Diagramm wird hier eingefügt -->
+        </div>
+    </div>
+    <div class="section market-participants">
+        <h2>Marktteilnehmer</h2>
+        <ul>
+            <li><a href="#">Balance Authority</a></li>
+            <li><a href="#">Metering Authority</a></li>
+            <li><a href="#">Physical Asset Authority</a></li>
+            <li><a href="#">Consumption Plant</a></li>
+            <li><a href="#">Generation Plant</a></li>
+        </ul>
+    </div>
+    <div class="section transactions-table">
+        <h2>Die letzten 10 Blockchain Transaktionen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaktions-Typ</th>
+                    <th>Blocknummer</th>
+                    <th>Transaktions-Hash</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Tabelle wird hier mit Daten gefüllt -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
