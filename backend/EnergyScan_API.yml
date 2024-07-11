@@ -1,0 +1,2490 @@
+openapi: 3.0.0
+info:
+  title: Energyscan API
+  description: |
+    Energyscan is a blockchain explorer that listens to all events from any b2e2 contracts and makes the data accessible via web app and API. Energyscan does not retrieve data from the b2e2 blockchain API but communicates directly with the blockchain nodes.
+
+    This server provides the public HTTP GET endpoints used by the Energyscan web app.
+
+    [Here](https://b2e2-energyscan-webapp-privatechain-prod.azurewebsites.net/api/oas.json) is the oas in json format.
+
+    **Before getting started:**
+
+    - Checkout `GET /utils/blockchain-sync-status` before using this API.
+
+    - Make sure to only use contract addresses created after the block specified in `first_searched_block_with_event` from `GET /utils/blockchain-sync-status`.
+
+    - The b2e2 contracts, from which information should be retrieved, must be a child of the commit `bfb4e6071be5f4474a0608f9810ce07c76ef2861` in [B2E2/b2e2_contracts](https://github.com/B2E2/b2e2_contracts).
+
+  contact:
+    name: BlockInfinity
+    url: http://www.blockinfinity.com
+    email: contact@blockinfinity.com
+  version: 2.0.1
+servers:
+  - url: /api
+tags:
+  - name: markets
+  - name: markets / identity contracts (idc)
+  - name: markets / identity contracts (idc) / balances
+  - name: markets / claims
+  - name: markets / transactions (tx)
+  - name: markets / balance authorities / distributors
+  - name: utils
+paths:
+  /markets/{market_authority_idc_address}:
+    get:
+      description: ' '
+      tags:
+        - markets
+      operationId: marketsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Market'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/idc/plants:
+    get:
+      tags:
+        - markets / identity contracts (idc)
+      operationId: plantsGET
+      x-router-controller: controller
+      description: |
+        Returns all identity contracts, that have at least one valid claim with one of the following topics:
+
+        * 'LOCATION_CLAIM', 
+
+        * 'EXISTENCE_CLAIM',
+
+        * 'MAX_POWER_GENERATION_CLAIM', 
+
+        * 'GENERATION_TYPE_CLAIM', 
+
+        * 'INSTALLATION_DATE_CLAIM',
+
+        * 'METERING_CLAIM', 
+
+        * 'BALANCE_CLAIM'.
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: with_location
+          in: query
+          description: If true, only identity contracts with a valid location claim are returned.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+        - name: with_generation_type
+          in: query
+          description: If true, only identity contracts with a valid generation type claim are returned.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plants'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/idc/authorities:
+    get:
+      tags:
+        - markets / identity contracts (idc)
+      operationId: authoritiesGET
+      x-router-controller: controller
+      description: |
+        Returns all identity contracts, that have at least one valid claim with one of the following topics: 
+
+        * 'IS_BALANCE_AUTHORITY',
+
+        * 'IS_PHYSICAL_ASSET_AUTHORITY',
+
+        * 'IS_METERING_AUTHORITY',
+
+        * 'ENERGY_TOKEN_CONTRACT_CLAIM',
+
+        * 'MARKET_RULES_CLAIM',
+
+        * 'IDENTITY_CONTRACT_FACTORY_CLAIM'.
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorities'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/idc/{idc_address}/balances:
+    get:
+      tags:
+        - markets / identity contracts (idc) / balances
+      operationId: balancesGET
+      x-router-controller: controller
+      description: 'Returns all balances for the specified time interval.'
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the market authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: idc_address
+          in: path
+          description: Address of the plant's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: start
+          in: query
+          description: As defined by date-time-RFC3339. Returns all tokens with balance_periods >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: As defined by date-time-RFC3339. Returns all tokens with balance_periods <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: token_kind
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum:
+              - ABSOLUTE_FORWARD
+              - GENERATION_BASED_FORWARD
+              - CONSUMPTION_BASED_FORWARD
+              - CERTIFICATE
+              # - PROPERTY_FORWARD
+        - name: page
+          in: query
+          description: ''
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balances'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/claims:
+    get:
+      tags:
+        - markets / claims
+      operationId: claimsGet
+      x-router-controller: controller
+      description: Removed claims are not shown.
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: valid_from
+          in: query
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: valid_to
+          in: query
+          description: As defined by date-time-RFC3339. Returns claims with valid_to >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claims'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/claim-publications:
+    get:
+      description: 'The transaction endpoints provide raw event data retrieved from the blockchain.'
+      tags:
+        - markets / transactions (tx)
+      operationId: claimPublicationsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: topic
+          in: query
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            description: Event Topic.
+            enum:
+              - IS_BALANCE_AUTHORITY
+              - IS_METERING_AUTHORITY
+              - IS_PHYSICAL_ASSET_AUTHORITY
+              - METERING_CLAIM
+              - BALANCE_CLAIM
+              - EXISTENCE_CLAIM
+              - MAX_POWER_GENERATION_CLAIM
+              - MAX_POWER_CONSUMPTION_CLAIM
+              - GENERATION_TYPE_CLAIM
+              - INSTALLATION_DATE_CLAIM
+              - LOCATION_CLAIM
+              - IDENTITY_CONTRACT_FACTORY_CLAIM
+              - ENERGY_TOKEN_CONTRACT_CLAIM
+              - MARKET_RULES_CLAIM
+              - ACCEPTED_DISTRIBUTOR_CLAIM
+              - REAL_WORLD_PLANT_ID_CLAIM
+        - name: valid_from
+          in: query
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: valid_to
+          in: query
+          description: As defined by date-time-RFC3339. Returns claims with valid_to >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: blocknumber_from
+          description: The starting block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: blocknumber_to
+          description: The ending block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimPublications'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/token-transfers:
+    get:
+      tags:
+        - markets / transactions (tx)
+      operationId: tokenTransfersGET
+      x-router-controller: controller
+      description: 'The transaction endpoints provide raw event data retrieved from the blockchain. Note: ERC1155 Batch Transfers are not yet taken into account.'
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: start
+          in: query
+          description: As defined by date-time-RFC3339. Returns all token-transfers with balance_periods >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: As defined by date-time-RFC3339. Returns all token-transfers with balance_periods <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: blocknumber_from
+          description: The starting block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: blocknumber_to
+          description: The ending block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1. Default is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateTransfers'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/token-transfers/aggregations:
+    get:
+      description: 'Retrieve aggregated data of certificate token transfers within a specified market and time range.'
+      tags:
+        - markets / transactions (tx)
+      operationId: tokenTransfersAggregationsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: The Ethereum checksum address of the market authority's identity contract. This address is used to identify the specific market for which the data aggregation is requested.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+            example: '0xD86197B9Edb877d8538f7c47ad9BA4d1534F28ab'
+        - name: generation_plant_idc_address
+          in: query
+          description: Filters the aggregated data to only include token transfers associated with the specified generation plant's identity contract.
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            example: '0x4Bb1D9fA36e4D8af23206D0b1c9A0DaAACf87c64'
+        - name: token_kind
+          in: query
+          description: Filters the aggregated data to only include token transfers associated with the specified token kind. Currently, only 'CERTIFICATE' tokens are supported.
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum:
+              - CERTIFICATE
+        - name: transfer_type
+          in: query
+          description: Filters the aggregated data to only include token transfers associated with the specified transfer type. Currently, only 'MINTING' is supported.
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum:
+              - MINTING
+        - name: start
+          in: query
+          description: The first balance period of the time range for which data is to be aggregated, conforming to date-time as defined by RFC3339.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          description: The last balance period of the time range for which data is to be aggregated, conforming to date-time as defined by RFC3339.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenTransfersAggregation'
+              example:
+                sum_of_values: '100000000000000000000'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/energy-documentations:
+    get:
+      description: 'The transaction endpoints provide raw event data retrieved from the blockchain.'
+      tags:
+        - markets / transactions (tx)
+      operationId: energyDocumentationsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: start
+          in: query
+          description: As defined by date-time-RFC3339. Returns all energy-documentations with balance_periods >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: As defined by date-time-RFC3339. Returns all energy-documentations with balance_periods <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: blocknumber_from
+          description: The starting block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: blocknumber_to
+          description: The ending block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnergyDocumentations'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/identity-contract-creations:
+    get:
+      description: 'The transaction endpoints provide raw event data retrieved from the blockchain.'
+      tags:
+        - markets / transactions (tx)
+      operationId: identitycontractcreationsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+          example: '0xD86197B9Edb877d8538f7c47ad9BA4d1534F28ab'
+        - name: blocknumber_from
+          description: The starting block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: blocknumber_to
+          description: The ending block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityContractCreations'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/balances-converted-to-soulbounds:
+    get:
+      description: 'The transaction endpoints provide raw event data retrieved from the blockchain.'
+      tags:
+        - markets / transactions (tx)
+      operationId: balanceconvertedtosoulboundsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+          example: '0xD86197B9Edb877d8538f7c47ad9BA4d1534F28ab'
+        - name: start
+          in: query
+          description: As defined by date-time-RFC3339. Returns all token-transfers with balance_periods >= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: As defined by date-time-RFC3339. Returns all token-transfers with balance_periods <= this argument.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: blocknumber_from
+          description: The starting block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: blocknumber_to
+          description: The ending block number for retrieving transactions.
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceConvertedToSoulbounds'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/tx/balances-converted-to-soulbounds/aggregations:
+    get:
+      description: |
+        This endpoint retrieves an aggregation of balances that have been converted to non-transferable tokens, known "soulbounds", within a particular market authority's purview and specified time range. It provides insights into the  distribution across different generation types, agents, or plants.
+      tags:
+        - markets / transactions (tx)
+      operationId: balanceconvertedtosoulboundsAggregationsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: 'This is the unique identifier for the market authority in the Ethereum blockchain. It specifies the market authority identity contract whose transactions you want to query.'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            pattern: ^0x[a-fA-F0-9]{40}$
+            example: '0xD86197B9Edb877d8538f7c47ad9BA4d1534F28ab'
+        - name: group_by
+          in: query
+          description: 'Defines the criteria for grouping the aggregated data, such as by the type of generation, the specific agent, or the generation plant’s identity contract address.'
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+            enum:
+              - generation_type
+              - agent
+              - generation_plant_idc_address
+        - name: generation_plant_idc_address
+          in: query
+          description: 'Filters the aggregation to include only the transactions involving the specified generation plant’s Ethereum address.'
+          required: false
+          style: form
+          explode: true
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: agent
+          in: query
+          description: 'Narrows the aggregation scope to the transactions carried out by a specific agent, which is a plant or entity whose certificates are soulbound.'
+          required: false
+          style: form
+          explode: true
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: start
+          in: query
+          description: The first balance period of the time range for which data is to be aggregated, conforming to date-time as defined by RFC3339.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          description: The last balance period of the time range for which data is to be aggregated, conforming to date-time as defined by RFC3339.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        '200':
+          description: A list of aggregated balances converted to soulbounds.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceConvertedToSoulboundsAggregations'
+              example:
+                page: 1
+                per_page: 20
+                total_number_of_items: 1
+                items:
+                  - generation_plant_idc_address: '0x4Bb1D9fA36e4D8af23206D0b1c9A0DaAACf87c64'
+                    location: '[[6.0274563,0.8008282],[6.1274563,0.7008282],[6.2274563,0.6008282]]'
+                    generation_type: 'PV'
+                    sum_of_values: '100000000000000000000'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /markets/{market_authority_idc_address}/balance-authorities/{balance_authority_idc_address}/distributors:
+    get:
+      description: ' '
+      tags:
+        - markets / balance authorities / distributors
+      operationId: distributorsGET
+      x-router-controller: controller
+      parameters:
+        - name: market_authority_idc_address
+          in: path
+          description: Address of the authority's identity contract. Must be an Ethereum checksum address. The pattern is ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: balance_authority_idc_address
+          in: path
+          description: Address of the balance authority's identity contract. Must be an Ethereum checksum address and in format ^0x[a-fA-F0-9]{40}$.
+          required: true
+          style: simple
+          explode: false
+          schema:
+            pattern: ^0x[a-fA-F0-9]{40}$
+            description: Ethereum checksum address.
+            type: string
+        - name: search_query
+          in: query
+          description: Query must follow the pattern ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            pattern: ^(\w+:(\w+|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\dZ))|( and | or | AND | OR ))+$
+        - name: page
+          in: query
+          description: Page index of the results to return. First page is 1.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 1
+        - name: per_page
+          in: query
+          description: Number of results per page.
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int64
+            default: 20
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Distributors'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+  /utils/blockchain-sync-status:
+    get:
+      description: ' '
+      tags:
+        - utils
+      operationId: blockchainSyncStatusGET
+      x-router-controller: controller
+      responses:
+        '200':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainSyncStatus'
+        '400':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Page not available
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: wildcard
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Error'
+                  - $ref: '#/components/schemas/ValidationError'
+      x-swagger-router-controller: controller.js
+components:
+  schemas:
+    Market:
+      type: object
+      required:
+        - balance_period_start
+        - balance_period_length_in_seconds
+        - claims_of_market_authority
+        - number_of_market_participants
+        - energy_mix
+      properties:
+        balance_period_start:
+          description: The block number at which the market begins is the balance period.
+          type: number
+        balance_period_length:
+          type: number
+          format: int64
+          description: Time in seconds.
+        claims_of_market_authority:
+          type: array
+          items:
+            $ref: '#/components/schemas/Claim'
+        number_of_market_participants:
+          type: array
+          items:
+            type: object
+            properties:
+              number:
+                type: number
+              type:
+                type: string
+                enum:
+                  - BALANCE_AUTHORITY
+                  - MARKET_AUTHORITY
+                  - METERING_AUTHORITY
+                  - PHYSICAL_ASSET_AUTHORITY
+                  - CONSUMPTION_PLANT
+                  - GENERATION_PLANT
+                  - UNDEFINED_PLANT
+        energy_mix:
+          type: array
+          items:
+            type: object
+            properties:
+              generation_type:
+                $ref: '#/components/schemas/GenerationType'
+              total_installed_power_in_watt:
+                type: number
+                description: The sum of the maximum power generation capabilities of all generation plants [in watt].
+    Plants:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plant'
+    Plant:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        real_world_plant_id:
+          type: string
+          description: Identifies the plant in the real world.
+          nullable: true
+        plant_type:
+          type: string
+          enum:
+            - generation
+            - consumption
+            - NONE
+          nullable: true
+        max_power_gen_in_watt:
+          type: integer
+          format: int64
+          nullable: true
+        max_power_con_in_watt:
+          type: integer
+          format: int64
+          nullable: true
+        balance_authority_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+          nullable: true
+        physical_asset_authority_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+          nullable: true
+        metering_authority_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+          nullable: true
+        location:
+          type: string
+          description: Each WG 84 geo coordinate of this array represents a corner of
+            a polygon in which the generation plant is located. The coordinates are arranged
+            clockwise. A geo coordinate can have at most 6 decimals.
+          example: '[[6.0274563,0.8008282],[6.1274563,0.7008282],[6.2274563,0.6008282]]'
+          nullable: true
+        generation_type:
+          $ref: '#/components/schemas/GenerationType'
+        installation_date:
+          $ref: '#/components/schemas/InstallationDate'
+        installation_date_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        location_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        existence_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        max_power_generation_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        max_power_consumption_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        generation_type_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        balance_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        metering_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        real_world_plant_id_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        authorized:
+          type: integer
+          format: int1
+          description: If authorized is 1 (:=true), then the plant does have all necessary claims - at least in this moment - to trade energy and certificates.
+          nullable: true
+    Balances:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+        page:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+    Balance:
+      type: object
+      required:
+        - balance
+        - soulbound_balance
+        - balance_period
+        - generation_plant
+        - token_kind
+      properties:
+        token_kind:
+          type: string
+          enum:
+            - ABSOLUTE_FORWARD
+            - GENERATION_BASED_FORWARD
+            - CONSUMPTION_BASED_FORWARD
+            - CERTIFICATE
+        balance:
+          type: string
+          pattern: '^[0-9]+$'
+          description: Energy in kilo watt per hour times 10^(-18). 1 kWh ⇔ value = 1e18.
+        soulbound_balance:
+          type: string
+          pattern: '^[0-9]+$'
+          description: Energy in kilo watt per hour times 10^(-18). 1 kWh ⇔ value = 1e18.
+        balance_period:
+          type: string
+          description: As defined by date-time-RFC3339.
+        generation_plant:
+          type: object
+          required:
+            - generation_type
+            - location
+            - max_power_gen_in_watt
+            - plant_idc_address
+          properties:
+            generation_type:
+              $ref: '#/components/schemas/GenerationType'
+            location:
+              type: string
+              description: Each WG 84 geo coordinate of this array represents a corner of
+                a polygon in which the generation plant is located. The coordinates are arranged
+                clockwise. A geo coordinate can have at most 6 decimals.
+              example: '[[6.0274563,0.8008282],[6.1274563,0.7008282],[6.2274563,0.6008282]]'
+            max_power_gen_in_watt:
+              type: integer
+            plant_idc_address:
+              type: string
+              pattern: ^0x[a-fA-F0-9]{40}$
+              description: Ethereum checksum address.
+            installation_date:
+              $ref: '#/components/schemas/InstallationDate'
+    Authorities:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Authority'
+    Authority:
+      type: object
+      required:
+        - address
+        - authority_type
+      properties:
+        address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        authority_type:
+          type: string
+          enum:
+            - PHYSICAL_ASSET_AUTHORITY
+            - METERING_AUTHORITY
+            - BALANCE_AUTHORITY
+            - MARKET_AUTHORITY
+        is_balance_authority_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        is_physical_asset_authority_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        is_metering_authority_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        energy_token_contract_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        identity_contract_factory_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        market_rules_claim_id:
+          $ref: '#/components/schemas/ClaimId'
+    Claims:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Claim'
+    Claim:
+      type: object
+      required:
+        - claim_id
+        - topic
+        - subject
+        - issuer
+        - valid_from
+        - valid_to
+        - blocknumber
+        - tx_hash
+      properties:
+        claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        topic:
+          type: string
+          description: Event Topic.
+          enum:
+            - IS_BALANCE_AUTHORITY
+            - IS_METERING_AUTHORITY
+            - IS_PHYSICAL_ASSET_AUTHORITY
+            - METERING_CLAIM
+            - BALANCE_CLAIM
+            - EXISTENCE_CLAIM
+            - MAX_POWER_GENERATION_CLAIM
+            - MAX_POWER_CONSUMPTION_CLAIM
+            - GENERATION_TYPE_CLAIM
+            - INSTALLATION_DATE_CLAIM
+            - LOCATION_CLAIM
+            - IDENTITY_CONTRACT_FACTORY_CLAIM
+            - ENERGY_TOKEN_CONTRACT_CLAIM
+            - MARKET_RULES_CLAIM
+            - ACCEPTED_DISTRIBUTOR_CLAIM
+            - REAL_WORLD_PLANT_ID_CLAIM
+        subject:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: The identity contract address, that is subject of the claim and that is holding the claim. Ethereum checksum address.
+        issuer:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: The externally owned Ethereum account of the authority, that has signed the claim. The address of this account is saved in the 'owner' variable in the authority's identity contract. Ethereum checksum address.
+        valid_from:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+        valid_to:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_to >= this argument.
+        data:
+          type: string
+          description: This is the raw JSON string that contains besides the valid_from and valid_to dates all the additional claim data.
+        blocknumber:
+          type: number
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+    EnergyDocumentations:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnergyDocumentation'
+    EnergyDocumentation:
+      type: object
+      required:
+        - energy_token_contract_address
+        - corrected
+        - metering_authority_idc_address
+        - plant_type
+        - value
+        - plant_idc_address
+        - balance_period
+        - blocknumber
+        - tx_hash
+      properties:
+        energy_token_contract_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+        corrected:
+          type: integer
+          format: int1
+          description: Specifies whether this energy documentation corrects existing metering values.
+        metering_authority_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+        plant_type:
+          type: string
+          enum:
+            - 'consumption'
+            - 'generation'
+        value:
+          type: string
+          pattern: '^[0-9]+$'
+          description: Energy in kilo watt per hour times 10^(-18). 1 kWh ⇔ value = 1e18.
+        plant_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        balance_period:
+          type: string
+          description: As defined by date-time-RFC3339.
+        blocknumber:
+          type: number
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+    BalanceConvertedToSoulbounds:
+      required:
+        - items
+        - page
+        - per_page
+        - total_number_of_items
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        total_number_of_items:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BalanceConvertedToSoulbound'
+    BalanceConvertedToSoulbound:
+      type: object
+      required:
+        - event_id
+        - energy_token_contract_address
+        - market_authority
+        - balance_period
+        - value
+        - generation_plant
+        - agent
+        - blocknumber
+        - tx_hash
+      properties:
+        event_id:
+          type: string
+          description: hash(event log) in form of a hex decimal string.
+        energy_token_contract_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        market_authority:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        balance_period:
+          type: string
+          description: As defined by date-time-RFC3339.
+        value:
+          type: string
+          pattern: '^[0-9]+$'
+          description: Energy in kilo watt per hour times 10^(-18). 1 kWh ⇔ value = 1e18.
+        generation_plant:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        agent:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: The plant for which the certificates were made soulbound. Ethereum checksum address.
+        blocknumber:
+          type: number
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+    TokenTransfersAggregation:
+      description: |
+        Represents an aggregation of token transfers, which are grouped by the generation plant's IDC address.
+      type: object
+      required:
+        - sum_of_values
+      properties:
+        sum_of_values:
+          type: string
+          pattern: '^[0-9]+$'
+          description: The sum of energy values in kilowatt-hours, scaled by 10^(-18) to adjust for unit precision. A value of 1e18 corresponds to 1 kWh.
+    BalanceConvertedToSoulboundsAggregations:
+      required:
+        - items
+        - page
+        - per_page
+        - total_number_of_items
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        total_number_of_items:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BalanceConvertedToSoulboundsAggregation'
+    BalanceConvertedToSoulboundsAggregation:
+      description: |
+        Represents an aggregation of balances converted to soulbounds, which could be grouped by either the generation type or the consumption plant's IDC address.
+      type: object
+      required:
+        - sum_of_values
+      properties:
+        generation_type:
+          $ref: '#/components/schemas/GenerationType'
+        generation_plant_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        location:
+          type: string
+          description: Each WG 84 geo coordinate of this array represents a corner of
+            a polygon in which the generation plant is located. The coordinates are arranged
+            clockwise. A geo coordinate can have at most 6 decimals.
+          example: '[[6.0274563,0.8008282],[6.1274563,0.7008282],[6.2274563,0.6008282]]'
+        agent:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: The Ethereum checksum address for the consumption plant's identity contract.
+        sum_of_values:
+          type: string
+          pattern: '^[0-9]+$'
+          description: The sum of energy values in kilowatt-hours, scaled by 10^(-18) to adjust for unit precision. A value of 1e18 corresponds to 1 kWh.
+    IdentityContractCreations:
+      required:
+        - items
+        - page
+        - per_page
+        - total_number_of_items
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        total_number_of_items:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityContractCreation'
+    IdentityContractCreation:
+      type: object
+      required:
+        - event_id
+        - market_authority
+        - identity_contract_address
+        - balance_period_length
+        - blocknumber
+        - tx_hash
+      properties:
+        event_id:
+          type: string
+          description: hash(event log) in form of a hex decimal string.
+        market_authority:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        identity_contract_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        balance_period_length:
+          type: number
+          format: int64
+          description: Time in seconds.
+        blocknumber:
+          type: number
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+    ClaimPublications:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClaimPublication'
+    ClaimPublication:
+      type: object
+      required:
+        - event_id
+        - claim_id
+        - subject
+        - topic
+        - issuer
+        - event_name
+        - valid_from
+        - valid_to
+        - data
+        - blocknumber
+        - tx_hash
+      properties:
+        event_id:
+          type: string
+          description: hash(event log) in form of a hex decimal string.
+        topic:
+          type: string
+          description: Event Topic.
+          # todo refactoring why is topice defined twice
+          enum:
+            - IS_BALANCE_AUTHORITY
+            - IS_METERING_AUTHORITY
+            - IS_PHYSICAL_ASSET_AUTHORITY
+            - METERING_CLAIM
+            - BALANCE_CLAIM
+            - EXISTENCE_CLAIM
+            - MAX_POWER_GENERATION_CLAIM
+            - MAX_POWER_CONSUMPTION_CLAIM
+            - GENERATION_TYPE_CLAIM
+            - INSTALLATION_DATE_CLAIM
+            - LOCATION_CLAIM
+            - IDENTITY_CONTRACT_FACTORY_CLAIM
+            - ENERGY_TOKEN_CONTRACT_CLAIM
+            - MARKET_RULES_CLAIM
+            - ACCEPTED_DISTRIBUTOR_CLAIM
+            - REAL_WORLD_PLANT_ID_CLAIM
+        event_name:
+          type: string
+          description: Name of the event in solidity.
+        claim_id:
+          $ref: '#/components/schemas/ClaimId'
+        subject:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        issuer:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: The externally owned Ethereum account of the authority, that has signed the claim. The address of this account is saved in the 'owner' variable in the authority's identity contract. Ethereum checksum address.
+        valid_from:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+        valid_to:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_to >= this argument.
+        blocknumber:
+          type: number
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+        data:
+          type: string
+          description: This is the raw JSON string that contains besides the valid_from and valid_to dates all the additional claim data.
+    CertificateTransfers:
+      required:
+        - items
+        - page
+        - per_page
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateTransfer'
+    CertificateTransfer:
+      type: object
+      required:
+        - value
+        - token_sender_idc_address
+        - token_receiver_idc_address
+        - generation_plant_idc_address
+        - balance_period
+        - blocknumber
+        - transfer_type
+        - tx_hash
+      properties:
+        value:
+          type: string
+          pattern: '^[0-9]+$'
+          description: Energy in kilo watt per hour times 10^(-18). 1 kWh ⇔ value = 1e18.
+        token_sender_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        token_receiver_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        generation_plant_idc_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        balance_period:
+          type: string
+          description: As defined by date-time-RFC3339.
+        blocknumber:
+          type: number
+        transfer_type:
+          type: string
+          enum:
+            - P2P
+            - MINTING
+        tx_hash:
+          $ref: '#/components/schemas/TxHash'
+    Distributors:
+      required:
+        - items
+        - page
+        - per_page
+        - total_number_of_items
+      type: object
+      properties:
+        per_page:
+          type: integer
+          format: int64
+        page:
+          type: integer
+          format: int64
+        total_number_of_items:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Distributor'
+    Distributor:
+      type: object
+      required:
+        - distributor_contract_address
+        - valid_from
+        - valid_to
+        - claim_id
+      properties:
+        distributor_contract_address:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{40}$
+          description: Ethereum checksum address.
+        valid_from:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_from <= this argument.
+        valid_to:
+          type: string
+          description: As defined by date-time-RFC3339. Returns claims with valid_to >= this argument.
+        claim_id:
+          $ref: '#/components/schemas/ClaimId'
+    BlockchainSyncStatus:
+      type: object
+      required:
+        - network
+        - last_crawled_block
+        - current_block_number
+      properties:
+        network:
+          type: string
+          enum:
+            - RINKEBY
+            - LOCAL_TESTNET
+            - PRIVATECHAIN
+        last_crawled_block:
+          type: number
+          description: The last transaction block that was searched for events by this api.
+        current_block_number:
+          type: number
+    ClaimId:
+      type: string
+      pattern: '^0x[a-fA-F0-9]+$'
+      description: Hash of claim type and issuer represented as 256 bit integer in hex format.
+      nullable: true
+    TxHash:
+      type: string
+      pattern: '^0x[a-fA-F0-9]{64}$'
+    Error:
+      required:
+        - status
+        - message
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+    ValidationError:
+      type: array
+      items:
+        type: object
+        required:
+          - message
+        properties:
+          message:
+            type: string
+          error:
+            type: array
+            items:
+              type: object
+              required:
+                - code
+                - params
+                - message
+                - path
+              properties:
+                code:
+                  type: string
+                params:
+                  type: array
+                  items:
+                    type: string
+                message:
+                  type: string
+                path:
+                  type: string
+    GenerationType:
+      type: string
+      nullable: true
+      description: Specifies how the generation plant generates energy. <br/><br/>
+        HYDROR := Hydro Run-of-river and pondage <br/> HYDROPS := Hydro
+        Pumped Storage <br/> HYDROWS := Hydro Water Reservoir <br/> PV :=
+        Photovoltaics <br/> PVP := Photovoltaics-Park <br/> CSP := Concentrated Solar Power
+      enum:
+        - FISSION
+        - FUSION
+        - PV
+        - PVP
+        - CSP
+        - GEOTHERMAL
+        - HEATPUMP
+        - ONSHOREWIND
+        - OFFSHOREWIND
+        - WAVE
+        - NATURALGAS
+        - BIOGAS
+        - BROWNCOAL
+        - BLACKCOAL
+        - OIL
+        - DIESEL
+        - GARBAGE
+        - HYDROR
+        - HYDROPS
+        - HYDROWS
+        - OTHER
+        - NONE
+    InstallationDate:
+      type: string
+      nullable: true
+      description: As defined by date-time-RFC3339.
