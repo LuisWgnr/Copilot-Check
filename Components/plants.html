@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+	<meta charset="UTF-8">
+	<title>Anlagen</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+		}
+		.search-box {
+			display: flex;
+			justify-content: flex-end;
+			margin-bottom: 20px;
+		}
+		.search-box input {
+			padding: 10px;
+			font-size: 16px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+            width: 100%; /* Ensure the input field is wide enough */
+            max-width: 400px; /* Adjust max-width as needed to fit the placeholder text */
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+		th {
+			background-color: #f2f2f2;
+		}
+	</style>
+</head>
+<body>
+
+<h1>Anlagen</h1>
+
+<div class="search-box">
+	<input type="text" placeholder="Suche bspw. 'status:autorisiert [and/or ...]'">
+</div>
+
+<table>
+	<tr>
+		<th>Adresse</th>
+		<th>Typ</th>
+		<th>Maximale Leistung</th>
+		<th>Balance Authority</th>
+		<th>Physical Asset Authority</th>
+		<th>Metering Authority</th>
+		<th>Status</th>
+	</tr>
+    <tr>
+        <!-- input table here -->
+    </tr>
+</table>
+
+</body>
+</html>
