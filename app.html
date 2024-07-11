@@ -12,6 +12,12 @@
             background-color: #f1f1f1;
             overflow: hidden;
             display: flex; /* Use flexbox to evenly distribute the menu items */
+            position: fixed; /* Fix the navigation bar at the top */
+            top: 0; /* Position the navigation bar at the very top */
+            left: 0; /* Fix the navigation bar to the left edge */
+            right: 0; /* Fix the navigation bar to the right edge */
+            width: 100%; /* Ensure the navigation bar spans the full width */
+            z-index: 1000; /* Ensure the navigation bar stays on top of other content */
         }
 
         ul.navigation-bar li {
@@ -30,9 +36,8 @@
             background-color: #ddd;
         }
 
-        /* Add styling for the logo image */
-        .logo {
-            margin-right: 10px;
+        body {
+            padding-top: 50px; /* Add padding to the top of the body to prevent content from being hidden behind the fixed navigation bar */
         }
     </style>
 </head>
