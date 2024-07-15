@@ -1,5 +1,5 @@
 // API-Endpoint URL
-const apiUrl = 'https://b2e2-energyscan-webapp-privatechain-prod.azurewebsites.net/api/markets/{market_authority_idc_address}';
+const apiUrl = 'https://b2e2-energyscan-webapp-privatechain-prod.azurewebsites.net/api/markets/{market_authority_idc_address}/idc/authorities';
 
 // Replace {market_authority_idc_address} with the actual address
 const marketAuthorityIdcAddress = '0x4995241d2f0781D96c49D418e4A0fCF812d7ebA3'; // Insert Ethereum checksum address here
