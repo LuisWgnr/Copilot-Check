@@ -1,5 +1,3 @@
-// UseAPI.js
-
 // Import the function to fetch market data
 import { fetchMarketData } from './API_GET_market.mjs';
 
