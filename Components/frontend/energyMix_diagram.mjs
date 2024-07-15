@@ -1,4 +1,4 @@
-import { getEnergyMix } from '/backend/API_GET_energyMix.mjs';
+import { getEnergyMix } from '../../backend/API_GET_energyMix.mjs';
 
 getEnergyMix().then(generationPower => {
     const ctx = document.getElementById('energyMixChart').getContext('2d');
