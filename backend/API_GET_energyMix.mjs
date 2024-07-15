@@ -1,6 +1,7 @@
 // UseAPI.js
 
-const { fetchMarketData } = require('./API_GET_market.js');
+// Import the function to fetch market data
+import { fetchMarketData } from './API_GET_market.mjs';
 
 // Function to fetch and process the energy mix data
 function getEnergyMix() {
@@ -23,4 +24,4 @@ function getEnergyMix() {
 }
 
 // Export the function that fetches and processes the energy mix
-module.exports = { getEnergyMix };
+export { getEnergyMix };

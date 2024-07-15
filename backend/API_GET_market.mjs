@@ -1,5 +1,5 @@
 // Purpose: Fetch market data from the API
-const { marketAddress } = require('./address.js');
+import { marketAddress } from './address.mjs';
 
 function fetchMarketData() {
   const apiUrl = 'https://b2e2-energyscan-webapp-privatechain-prod.azurewebsites.net/api/markets/{market_authority_idc_address}';
@@ -15,4 +15,4 @@ function fetchMarketData() {
 }
 
 // Export the function
-module.exports = { fetchMarketData };
+export { fetchMarketData };
