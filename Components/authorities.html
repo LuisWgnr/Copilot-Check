@@ -46,37 +46,56 @@
             <th>Typ</th>
         </tr>
         <tr>
-            <td>(backend Anbindung)</td> <!-- Backend connection -->
+            <td id="marketAuthorityAddress"> Loading...</td> <!-- Backend connection -->
             <td>Market Authority</td>
         </tr>
         <tr>
-            <td>(backend Anbindung)</td>
+            <td id="meteringAuthorityAddress"> Loading...</td> <!-- Backend connection -->
             <td>Metering Authority</td>
         </tr>
         <tr>
-            <td>(backend Anbindung)</td>
+            <td id="physicalAssetAuthorityAddress"> Loading...</td> <!-- Backend connection -->
             <td>Physical Asset Authority</td>
         </tr>
-        <!-- More rows as needed -->
+        <tr>
+            <td id="balanceAuthorityAddress"> Loading...</td> <!-- Backend connection -->
+            <td>Balance  Authority</td>
+        </tr>    
     </table>
 
     <script type="module">
-        import { fetchAuthorities } from '/backend/API_GET_authorities.mjs';
+        import { marketAuthorityAddress } from '/backend/authoritiesAdresses/marketAut_adress.mjs';
+        import { meteringAuthorityAddress } from '/backend/authoritiesAdresses/meteringAut_adress.mjs';
+        import { physicalAssetAuthorityAddress } from '/backend/authoritiesAdresses/physicalAut_adress.mjs';
+        import { balanceAuthorityAddress } from '/backend/authoritiesAdresses/balanceAut_adress.mjs';
 
-        async function updateAuthoritiesAddresses() {
-            const authorities = await fetchAuthorities();
-            const rows = document.querySelectorAll('table tr:not(:first-child)');
+        marketAuthorityAddress().then(address => {
+            document.getElementById('marketAuthorityAddress').textContent = address;
+        }).catch(error => {
+            console.error('Failed to load market authority address:', error);
+            document.getElementById('marketAuthorityAddress').textContent = 'Failed to load address';
+        });
 
-            rows.forEach(row => {
-                const type = row.cells[1].textContent.trim().toUpperCase().replace(' ', '_') + '_AUTHORITY';
-                const authority = authorities.find(auth => auth.authority_type === type);
-                if (authority) {
-                    row.cells[0].textContent = authority.address;
-                }
-            });
-        }
+        meteringAuthorityAddress().then(address => {
+            document.getElementById('meteringAuthorityAddress').textContent = address;
+        }).catch(error => {
+            console.error('Failed to load metering authority address:', error);
+            document.getElementById('meteringAuthorityAddress').textContent = 'Failed to load address';
+        });
 
-        updateAuthoritiesAddresses();
+        physicalAssetAuthorityAddress().then(address => {
+            document.getElementById('physicalAssetAuthorityAddress').textContent = address;
+        }).catch(error => {
+            console.error('Failed to load pysical Asset authority address:', error);
+            document.getElementById('physicalAssetAuthorityAddress').textContent = 'Failed to load address';
+        });
+
+        balanceAuthorityAddress().then(address => {
+            document.getElementById('balanceAuthorityAddress').textContent = address;
+        }).catch(error => {
+            console.error('Failed to load balance authority address:', error);
+            document.getElementById('balanceAuthorityAddress').textContent = 'Failed to load address';
+        });
     </script>
 </body>
 </html>

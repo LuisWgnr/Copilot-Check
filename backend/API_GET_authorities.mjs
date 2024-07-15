@@ -36,4 +36,3 @@ function fetchAuthorities() {
 
 // Export the function
 export { fetchAuthorities };
-fetchAuthorities();
