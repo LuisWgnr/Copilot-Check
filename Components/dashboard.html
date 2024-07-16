@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,9 +21,11 @@
             width: 100%;
             z-index: 1000;
         }
+
         ul.navigation-bar li {
             flex: 1;
         }
+
         ul.navigation-bar li a {
             display: block;
             color: #333;
@@ -30,9 +33,11 @@
             padding: 14px 16px;
             text-decoration: none;
         }
+
         ul.navigation-bar li a:hover {
             background-color: #ddd;
         }
+
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -40,39 +45,78 @@
             gap: 20px;
             padding-top: 50px;
         }
+
         .overview {
             display: flex;
             justify-content: space-beween;
         }
+
         .section {
             border: 1px solid #ccc;
             padding: 20px;
             border-radius: 5px;
         }
-        .market-participants, .transactions-table {
+
+        .market-participants,
+        .transactions-table {
             width: 100%;
         }
+
         a {
             color: blue;
             text-decoration: none;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ccc;
             padding: 8px;
             text-align: left;
         }
+
         th {
             background-color: #f2f2f2;
         }
+
+        .horizontal-list {
+            list-style-type: none; /* Removes bullet points */
+            padding: 0; /* Removes default padding */
+            margin: 0; /* Removes default margin */
+        }
+        .horizontal-list li {
+            margin-bottom: 20px; /* Adds more space between the items vertically */
+            display: inline-block; /* Uses flexbox for alignment */
+            align-items: center; /* Aligns items vertically in the center */
+        }
+        .horizontal-list img {
+            vertical-align: middle;
+            margin-right: 5px;
+            margin-left: 20px;
+            width: 70px;
+            height: auto;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow to images */
+            border-radius: 50%; /* Makes the image and its shadow round */
+        }
+        .horizontal-list a,
+        .overview a {
+            color: #808080; /* Changes link color to grey */
+        }
+        .horizontal-list a:hover,
+        .overview a:hover {
+            color: #505050; /* Optional: Darker grey on hover for better UX */
+        }
     </style>
 </head>
+
 <body>
     <ul class="navigation-bar">
         <li><img src="../Grafiken/EnergyScan_logo.png" alt="Logo" class="logo"></li>
@@ -87,24 +131,33 @@
             <h2>Übersicht</h2>
             <p>Adresse:</p>
             <p>Bilanzzeitraum: 15 Minuten</p>
-            <p>Smart Contracts: <a href="https://b2e2-blockexplorer-prod.azurewebsites.net/address/0x4995241d2f0781D96c49D418e4A0fCF812d7ebA3">Energy Token Contract</a></p>
-            <p>Marktregeln: <a href="https://it-architecture.enbw.com/whitepaper-energy-token-model/">https://it-architecture.enbw.com/whitepaper-energy-token-model/</a></p>
+            <p>Smart Contracts: <a
+                    href="https://b2e2-blockexplorer-prod.azurewebsites.net/address/0x4995241d2f0781D96c49D418e4A0fCF812d7ebA3">Energy
+                    Token Contract</a></p>
+            <p>Marktregeln: <a
+                    href="https://it-architecture.enbw.com/whitepaper-energy-token-model/">https://it-architecture.enbw.com/whitepaper-energy-token-model/</a>
+            </p>
         </div>
         <div class="section">
             <h2>Installierte Erzeugungsleistung (kW peak)</h2>
             <canvas id="energyMixChart" width="100%" height="100%"></canvas> <!-- Canvas for the chart -->
-            <script type="module" src="/Components/frontend/energyMix_diagram.mjs"></script> <!-- Include the script for the chart -->
+            <script type="module" src="/Components/frontend/energyMix_diagram.mjs"></script>
+            <!-- Include the script for the chart -->
         </div>
     </div>
     <div class="section market-participants">
         <h2>Marktteilnehmer</h2>
-        <ul>
-            <li><a href="#">Balance Authority</a></li>
-            <li><a href="#">Metering Authority</a></li>
-            <li><a href="#">Physical Asset Authority</a></li>
-            <li><a href="#">Consumption Plant</a></li>
-            <li><a href="#">Generation Plant</a></li>
+    
+        <ul class="horizontal-list">
+            <li><img src="/Grafiken/BalanceAuthority_logo.png" alt="Balance Authority"><a href="authorities.html">Balance Authority</a></li>
+            <li><img src="/Grafiken/MeteringAuthority_logo.png" alt="Metering Authority"><a href="authorities.html">Metering Authority</a></li>
+            <li><img src="/Grafiken/PhysicalAssetAuthority_logo.png" alt="Physical Asset Authority"><a href="authorities.html">Physical Asset Authority</a></li>
         </ul>
+        <ul class="horizontal-list">
+            <li><img src="/Grafiken/ConsumationPlant_logo.png" alt="Consumption Plant"><a href="#">Consumption Plant</a></li>
+            <li><img src="/Grafiken/GenerationPlant_logo.png" alt="Generation Plant"><a href="#">Generation Plant</a></li>
+        </ul>
+    
     </div>
     <div class="section transactions-table">
         <h2>Die letzten 10 Blockchain Transaktionen</h2>
@@ -122,4 +175,5 @@
         </table>
     </div>
 </body>
+
 </html>
