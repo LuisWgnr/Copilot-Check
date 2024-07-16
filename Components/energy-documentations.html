@@ -59,7 +59,7 @@
         .search-box {
             display: flex;
             justify-content: flex-end;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
         }
 
         .search-box input {
@@ -72,7 +72,19 @@
             max-width: 400px;
             /* Adjust max-width as needed to fit the placeholder text */
         }
-
+        .date-inputs {
+            float: left;
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        #beginn {
+            margin-left: 5px;
+            margin-right: 20px;
+        }
+        #ende {
+            margin-left: 5px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -108,8 +120,18 @@
     </ul>
 
     <div class="search-box">
-        <input type="text" placeholder="Suche bspw. 'topic:balance claim [and/or ...]'">
+        <input type="text" placeholder="Suche bspw. 'typ:erzeugung [and/or ...]'">
     </div>
+
+    <!-- Input fields for Beginn and Ende -->
+    <div class="date-inputs">
+        <label for="beginn">Beginn:</label>
+        <input type="date" id="beginn" name="beginn">
+        
+        <label for="ende">Ende:</label>
+        <input type="date" id="ende" name="ende">
+    </div>
+
     <table>
         <thead>
             <tr>
