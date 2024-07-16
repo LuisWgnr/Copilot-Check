@@ -88,31 +88,64 @@
         }
 
         .horizontal-list {
-            list-style-type: none; /* Removes bullet points */
-            padding: 0; /* Removes default padding */
-            margin: 0; /* Removes default margin */
+            list-style-type: none;
+            /* Removes bullet points */
+            padding: 0;
+            /* Removes default padding */
+            margin: 0;
+            /* Removes default margin */
         }
+
         .horizontal-list li {
-            margin-bottom: 20px; /* Adds more space between the items vertically */
-            display: inline-block; /* Uses flexbox for alignment */
-            align-items: center; /* Aligns items vertically in the center */
+            margin-bottom: 20px;
+            /* Adds more space between the items vertically */
+            display: inline-block;
+            /* Uses flexbox for alignment */
+            align-items: center;
+            /* Aligns items vertically in the center */
         }
+
         .horizontal-list img {
             vertical-align: middle;
-            margin-right: 5px;
+            margin-right: 10px;
             margin-left: 20px;
             width: 70px;
             height: auto;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Adds shadow to images */
-            border-radius: 50%; /* Makes the image and its shadow round */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            /* Adds shadow to images */
+            border-radius: 50%;
+            /* Makes the image and its shadow round */
         }
-        .horizontal-list a,
-        .overview a {
-            color: #808080; /* Changes link color to grey */
+
+        .horizontal-list a {
+            color: #808080;
+            /* Changes link color to grey */
+            margin-bottom: 0;
+            /* Reduces space below the link */
         }
-        .horizontal-list a:hover,
-        .overview a:hover {
-            color: #505050; /* Optional: Darker grey on hover for better UX */
+
+        .horizontal-list a:hover {
+            color: #505050;
+            /* Optional: Darker grey on hover for better UX */
+        }
+
+        .participant-number {
+            display: inline-block;
+            /* Keeps the display as inline-block */
+            margin-left: 5px;
+            /* Maintains space between the text and the number */
+            font-size: 0.9em;
+            /* Keeps the font size */
+            color: #666;
+            /* Text color */
+            vertical-align: middle;
+            /* Keeps the vertical alignment */
+            background-color: #ADD8E6;
+            /* Sets the background color to light blue */
+            padding: 2px 4px;
+            /* Adds some padding around the text for better visibility */
+            border-radius: 4px;
+            /* Optional: Adds rounded corners */
         }
     </style>
 </head>
@@ -147,17 +180,55 @@
     </div>
     <div class="section market-participants">
         <h2>Marktteilnehmer</h2>
-    
+
         <ul class="horizontal-list">
-            <li><img src="/Grafiken/BalanceAuthority_logo.png" alt="Balance Authority"><a href="authorities.html">Balance Authority</a></li>
-            <li><img src="/Grafiken/MeteringAuthority_logo.png" alt="Metering Authority"><a href="authorities.html">Metering Authority</a></li>
-            <li><img src="/Grafiken/PhysicalAssetAuthority_logo.png" alt="Physical Asset Authority"><a href="authorities.html">Physical Asset Authority</a></li>
+            <li><img src="/Grafiken/BalanceAuthority_logo.png" alt="Balance Authority"><a
+                    href="authorities.html">Balance Authority</a><span class="participant-number"
+                    id="balanceAut-num">#</span></li>
+            <li><img src="/Grafiken/MeteringAuthority_logo.png" alt="Metering Authority"><a
+                    href="authorities.html">Metering Authority</a><span class="participant-number"
+                    id="meterAut-num">#</span></li>
+            <li><img src="/Grafiken/PhysicalAssetAuthority_logo.png" alt="Physical Asset Authority"><a
+                    href="authorities.html">Physical Asset Authority</a><span class="participant-number"
+                    id="pysicalAut-num">#</span></li>
         </ul>
         <ul class="horizontal-list">
-            <li><img src="/Grafiken/ConsumationPlant_logo.png" alt="Consumption Plant"><a href="plants.html">Consumption Plant</a></li>
-            <li><img src="/Grafiken/GenerationPlant_logo.png" alt="Generation Plant"><a href="plants.html">Generation Plant</a></li>
+            <li><img src="/Grafiken/ConsumationPlant_logo.png" alt="Consumption Plant"><a href="plants.html">Consumption
+                    Plant</a><span class="participant-number" id="consumPlant-num">#</span></li>
+            <li><img src="/Grafiken/GenerationPlant_logo.png" alt="Generation Plant"><a href="plants.html">Generation
+                    Plant</a><span class="participant-number" id="genPlant-num">#</span></li>
         </ul>
-    
+
+        <script type="module">
+            import { getNumberOfParticipants } from '/backend/API_GET_numberOfParticipants.mjs';
+
+            async function updateParticipantNumbers() {
+                const participants = await getNumberOfParticipants();
+
+                // Mapping the type to the corresponding HTML element ID
+                const idMap = {
+                    'BALANCE_AUTHORITY': 'balanceAut-num',
+                    'METERING_AUTHORITY': 'meterAut-num',
+                    'PHYSICAL_ASSET_AUTHORITY': 'pysicalAut-num',
+                    'CONSUMPTION_PLANT': 'consumPlant-num',
+                    'GENERATION_PLANT': 'genPlant-num'
+                };
+
+                // Update the numbers in the HTML
+                participants.forEach(participant => {
+                    const elementId = idMap[participant.type];
+                    if (elementId) {
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            element.textContent = participant.number;
+                        }
+                    }
+                });
+            }
+
+            // Call the function to update the numbers
+            updateParticipantNumbers();
+        </script>
     </div>
     <div class="section transactions-table">
         <h2>Die letzten 10 Blockchain Transaktionen</h2>
