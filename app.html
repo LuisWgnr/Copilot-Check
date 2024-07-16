@@ -53,28 +53,8 @@
     </ul>
     <div id="page-content"></div>
     <script>
-        // Define the loadContent function
-        function loadContent(url) {
-            fetch(url) // Load the content from the URL
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('page-content').innerHTML = html; // Set the loaded content into the container
-                })
-                .catch(error => console.error('Fehler beim Laden der Seite:', error));
-        }
-
-        // Add click event listeners to navigation links
-        document.querySelectorAll('.navigation-bar a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault(); // Prevents the default behavior of the link
-                const url = this.getAttribute('href'); // Get the URL of the link
-                loadContent(url); // Load the content using the loadContent function
-            });
-        });
-
-        // Load dashboard content when the page loads
-        window.onload = () => {
-            loadContent('Components/dashboard.html');
+        window.onload = function() {
+            window.location.href = "Components/dashboard.html";
         };
     </script>
 </body>

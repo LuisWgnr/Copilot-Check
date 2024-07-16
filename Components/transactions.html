@@ -5,8 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transactions Page</title>
     <style>
+        ul.navigation-bar {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f1f1;
+            overflow: hidden;
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        ul.navigation-bar li {
+            flex: 1;
+        }
+        ul.navigation-bar li a {
+            display: block;
+            color: #333;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        ul.navigation-bar li a:hover {
+            background-color: #ddd;
+        }
         body {
             font-family: Arial, sans-serif;
+            padding-top: 50px;
         }
         ul.navigation-bar_2 {
             list-style-type: none;
@@ -31,8 +59,14 @@
     </style>
 </head>
 <body>
-
-    <h1>Transaktionen</h1>
+    <ul class="navigation-bar">
+        <li><img src="../Grafiken/EnergyScan_logo.png" alt="Logo" class="logo"></li>
+        <li><a href="dashboard.html">Marktübersicht</a></li>
+        <li><a href="plants.html">Anlagen</a></li>
+        <li><a href="transactions.html">Transaktionen</a></li>
+        <li><a href="authorities.html">Authorities</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+    </ul>
 
     <ul class="navigation-bar_2">
         <li><a href="Components/claim-publications.html">Claim Veröffentlichungen</a></li>
