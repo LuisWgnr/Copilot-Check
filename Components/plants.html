@@ -118,13 +118,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 	const appendDataToTable = (data) => {
 		const tableBody = document.querySelector('table tbody');
-		// Use data.items to access the array
 		data.items.forEach(item => {
 			const row = document.createElement('tr');
-			// Assuming you want to display all values in the item object
-			Object.values(item).forEach(value => {
+			Object.keys(item).forEach(key => {
 				const cell = document.createElement('td');
-				cell.textContent = value;
+				// Check if the key is 'authorized' and the value is 1
+				if (key === 'authorized' && item[key] === 1) {
+					cell.textContent = 'Authorized'; // Set text to 'Authorized'
+				} else {
+					cell.textContent = item[key]; // Use the actual value for other keys
+				}
 				row.appendChild(cell);
 			});
 			tableBody.appendChild(row);
