@@ -92,10 +92,57 @@
             <th>Status</th>
         </tr>
     </thead>
-    <tr>
-        <!-- input table here -->
-    </tr>
+    <tbody>
+        <!-- Rows will be added here by the JavaScript -->
+    </tbody>
 </table>
+
+<script type="module">
+import { fetchPlants } from '/backend/API_GET_plants.mjs';
+
+document.addEventListener('DOMContentLoaded', (event) => {
+	let currentPage = 1;
+	let isLoading = false; // Prevent multiple API calls at the same time
+
+	const loadMoreData = async () => {
+		if (isLoading) return;
+		isLoading = true;
+
+		// Replace `fetchYourData` with your actual API call function
+		// This function should accept the current page and return data accordingly
+		const data = await fetchPlants(currentPage);
+		appendDataToTable(data);
+		currentPage++;
+		isLoading = false;
+	};
+
+	const appendDataToTable = (data) => {
+		const tableBody = document.querySelector('table tbody');
+		// Use data.items to access the array
+		data.items.forEach(item => {
+			const row = document.createElement('tr');
+			// Assuming you want to display all values in the item object
+			Object.values(item).forEach(value => {
+				const cell = document.createElement('td');
+				cell.textContent = value;
+				row.appendChild(cell);
+			});
+			tableBody.appendChild(row);
+		});
+	};
+
+	const checkScrollPosition = () => {
+		const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+		if (scrollTop + clientHeight >= scrollHeight - 5) { // Near bottom
+			loadMoreData();
+		}
+	};
+
+	window.addEventListener('scroll', checkScrollPosition);
+	loadMoreData(); // Initial load
+});
+
+</script>
 
 </body>
 </html>
