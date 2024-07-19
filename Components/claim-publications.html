@@ -88,6 +88,21 @@
         th {
             background-color: #f2f2f2;
         }
+        /* Truncate text in table cells */
+        .truncate {
+            max-width: 150px;
+            /* Adjust based on your needs */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        /* Expand text on hover */
+        .truncate:hover {
+            max-width: none;
+            white-space: normal;
+        }
     </style>
 </head>
 
@@ -128,6 +143,52 @@
             </tr>
         </tbody>
     </table>
+    <script type="module">
+        import { fetchClaims } from '/backend/API_GET_claims.mjs';
+    
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let currentPage = 1;
+            let isLoading = false; // Prevent multiple API calls at the same time
+    
+            const loadMoreData = async () => {
+                if (isLoading) return;
+                isLoading = true;
+                const data = await fetchClaims(currentPage);
+                appendDataToTable(data);
+                currentPage++;
+                isLoading = false;
+            };
+    
+            const appendDataToTable = (data) => {
+                const tableBody = document.querySelector('table tbody');
+                data.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="truncate">${item.subject}</td>
+                        <td class="truncate">${item.topic}</td>
+                        <td class="truncate">${item.issuer}</td>
+                        <td class="truncate">${item.valid_from}</td>
+                        <td class="truncate">${item.valid_to}</td>
+                        <td class="truncate">${item.blocknumber}</td>
+                        <td class="truncate">${item.tx_hash}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            };
+    
+            // Call loadMoreData to load data initially
+            loadMoreData();
+            
+            // Listen for scroll events
+            window.addEventListener('scroll', () => {
+                // Check if the user has scrolled to the bottom
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                    // Load more data
+                    loadMoreData();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
