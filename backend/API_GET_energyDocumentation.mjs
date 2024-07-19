@@ -24,7 +24,7 @@ function fetchEnergyDoc(page) {
                 blocknumber: item.blocknumber,
                 tx_hash: item.tx_hash
             }));
-            console.log(filteredData); // Print the filtered data to the console
+            //console.log(filteredData); // Print the filtered data to the console
             return { ...data, items: filteredData }; // Return the modified data object
         });
 }
@@ -32,4 +32,3 @@ function fetchEnergyDoc(page) {
 
 // Export the function
 export { fetchEnergyDoc };
-fetchEnergyDoc(1);
