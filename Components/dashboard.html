@@ -231,19 +231,40 @@
         </script>
     </div>
     <div class="section transactions-table">
-        <h2>Die letzten 10 Blockchain Transaktionen</h2>
-        <table>
+        <h2>Die letzten 10 Blockchain Token Transfers</h2>
+        <table id="transactions-table">
             <thead>
                 <tr>
-                    <th>Transaktions-Typ</th>
-                    <th>Blocknummer</th>
-                    <th>Transaktions-Hash</th>
+                    <th>Block Number</th>
+                    <th>Transaction Hash</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Tabelle wird hier mit Daten gefüllt -->
+                <!-- Rows will be added here dynamically -->
             </tbody>
         </table>
+    
+        <script type="module">
+            import { fetchlast10TX } from '/backend/API_GET_last10tx.mjs';
+    
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const transactions = await fetchlast10TX();
+                    const tableBody = document.getElementById('transactions-table').getElementsByTagName('tbody')[0];
+    
+                    transactions.forEach(transaction => {
+                        let row = tableBody.insertRow();
+                        let blockNumberCell = row.insertCell(0);
+                        let txHashCell = row.insertCell(1);
+    
+                        blockNumberCell.textContent = transaction.blocknumber;
+                        txHashCell.textContent = transaction.tx_hash;
+                    });
+                } catch (error) {
+                    console.error('Error fetching transactions:', error);
+                }
+            });
+        </script>
     </div>
 </body>
 
