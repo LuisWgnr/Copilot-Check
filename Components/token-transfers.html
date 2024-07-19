@@ -20,9 +20,11 @@
             width: 100%;
             z-index: 1000;
         }
+
         ul.navigation-bar li {
             flex: 1;
         }
+
         ul.navigation-bar li a {
             display: block;
             color: #333;
@@ -30,9 +32,11 @@
             padding: 14px 16px;
             text-decoration: none;
         }
+
         ul.navigation-bar li a:hover {
             background-color: #ddd;
         }
+
         ul.navigation-bar_2 {
             list-style-type: none;
             padding: 0;
@@ -40,9 +44,11 @@
             overflow: hidden;
             position: relative;
         }
+
         ul.navigation-bar_2 li {
             float: left;
         }
+
         ul.navigation-bar_2 li a {
             display: block;
             color: #333;
@@ -50,6 +56,7 @@
             padding: 14px 16px;
             text-decoration: none;
         }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -72,19 +79,23 @@
             max-width: 400px;
             /* Adjust max-width as needed to fit the placeholder text */
         }
+
         .date-inputs {
             float: left;
             display: flex;
             justify-content: flex-end;
             margin-bottom: 20px;
         }
+
         #beginn {
             margin-left: 5px;
             margin-right: 20px;
         }
+
         #ende {
             margin-left: 5px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -99,6 +110,22 @@
 
         th {
             background-color: #f2f2f2;
+        }
+
+        /* Truncate text in table cells */
+        .truncate {
+            max-width: 150px;
+            /* Adjust based on your needs */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        /* Expand text on hover */
+        .truncate:hover {
+            max-width: none;
+            white-space: normal;
         }
     </style>
 </head>
@@ -127,7 +154,7 @@
     <div class="date-inputs">
         <label for="beginn">Beginn:</label>
         <input type="date" id="beginn" name="beginn">
-        
+
         <label for="ende">Ende:</label>
         <input type="date" id="ende" name="ende">
     </div>
@@ -152,6 +179,53 @@
             </tr>
         </tbody>
     </table>
+    <script type="module">
+        import { fetchTokenTransfers } from '/backend/API_GET_tokenTransfers.mjs';
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let currentPage = 1;
+            let isLoading = false; // Prevent multiple API calls at the same time
+            const loadMoreData = async () => {
+                if (isLoading) return;
+                isLoading = true;
+                const data = await fetchTokenTransfers(currentPage);
+                appendDataToTable(data);
+                currentPage++;
+                isLoading = false;
+            };
+
+            const appendDataToTable = (data) => {
+                const tableBody = document.querySelector('table tbody');
+                data.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="truncate">${item.token_type}</td>
+                        <td class="truncate">${item.energy}</td>
+                        <td class="truncate">${item.sender}</td>
+                        <td class="truncate">${item.reciver}</td>
+                        <td class="truncate">${item.gen_plant}</td>
+                        <td class="truncate">${item.transfer_type}</td>
+                        <td class="truncate">${item.begin_balance_period}</td>
+                        <td class="truncate">${item.blocknumber}</td>
+                        <td class="truncate">${item.tx_hash}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            };
+
+            // Call loadMoreData to load data initially
+            loadMoreData();
+            
+            // Listen for scroll events
+            window.addEventListener('scroll', () => {
+                // Check if the user has scrolled to the bottom
+                if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+                    // Load more data
+                    loadMoreData();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
